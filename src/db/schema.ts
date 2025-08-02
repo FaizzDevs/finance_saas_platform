@@ -6,5 +6,5 @@ export const transactions = pgTable("transactions", {
     amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
     type: text("type").notNull(), //income or expense
     category: text("category"),
-    createdAt: timestamp("created_at").defaultNow(),
+    created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 })

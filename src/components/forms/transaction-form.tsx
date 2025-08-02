@@ -6,7 +6,7 @@ import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Button } from "../ui/button";
 
-export function TransactionForm() {
+export function TransactionForm({ onSuccess }: { onSuccess?: () => void }) {
     const [form, setForm] = useState({
         title: "",
         amount: "",
@@ -25,13 +25,27 @@ export function TransactionForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        await fetch("/api/transaction", {
+        if (!form.title.trim() || !form.category.trim() || !form.amount) {
+            alert("Semua harus diisi!")
+            return
+        }
+
+        const amountNum = Number(form.amount);
+        if(isNaN(amountNum) || amountNum <= 0){
+            alert("Jumlah harus berupa angka lebih dari 0")
+            return;
+        }
+
+        const res = await fetch("/api/transactions", {
             method: "POST",
             body: JSON.stringify({ ...form, amount: Number(form.amount) }),
             headers: { "Content-Type": "application/json" },
         });
 
-        setForm({ title: "", amount: "", type: "income", category: "" })
+        if(res.ok){
+            onSuccess?.();
+            setForm({ title: "", amount: "", type: "income", category: "" })
+        }
     };
 
     return (
