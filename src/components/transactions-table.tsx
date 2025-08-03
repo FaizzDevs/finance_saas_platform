@@ -11,7 +11,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 
 type Transaction = {
-    id: string;
+    id: number;
     title: string;
     amount: number;
     type: string;
@@ -44,7 +44,7 @@ export function TransactionTable({ refreshKey }: { refreshKey: number }) {
         })
 
         if (res.ok) {
-            setData((prev) => prev.filter((trx) => trx.id !== id));
+            setData((prev) => prev.filter((trx) => trx.id !== Number(id)));
         } else {
             const errorText = await res.text();
             console.error("Gagal menghapus:", res.status, errorText)
@@ -56,7 +56,7 @@ export function TransactionTable({ refreshKey }: { refreshKey: number }) {
         e.preventDefault();
         if (!editData) return;
 
-        const res = await fetch(`/api/transactions/${editData}`, {
+        const res = await fetch(`/api/transactions/${editData.id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -140,7 +140,7 @@ export function TransactionTable({ refreshKey }: { refreshKey: number }) {
                                         <Button
                                             variant="destructive"
                                             size="sm"
-                                            onClick={() => handleDelete(trx.id)}
+                                            onClick={() => handleDelete(String(trx.id))}
                                         >
                                             Hapus
                                         </Button>
@@ -154,7 +154,7 @@ export function TransactionTable({ refreshKey }: { refreshKey: number }) {
 
             {editData && (
                 <Dialog
-                    open={!editData}
+                    open={Boolean(editData)}
                     onOpenChange={(open) => !open && setEditData(null)}
                 >
                     <DialogContent className="sm:max-w-[500px]">
@@ -192,7 +192,7 @@ export function TransactionTable({ refreshKey }: { refreshKey: number }) {
                                         id="amount"
                                         type="number"
                                         className="col-span-3"
-                                        value={editData?.amount ?? ""}
+                                        value={editData? String(editData.amount) : ""}
                                         onChange={(e) => 
                                             setEditData((prev) => prev && { ...prev, amount: Number(e.target.value) })
                                         }

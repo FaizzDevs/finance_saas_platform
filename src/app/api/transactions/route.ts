@@ -1,17 +1,18 @@
 import { db } from "@/lib/db";
 import { transactions } from "@/db/schema";
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 
 export async function GET() {
     const all = await db
         .select()
         .from(transactions)
+        .orderBy(desc(transactions.created_at))
 
     return NextResponse.json(all)
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     const body = await req.json();
 
     if(
@@ -31,45 +32,4 @@ export async function POST(req: Request) {
         .returning()
 
     return NextResponse.json(result[0])
-}
-
-export async function DELETE(
-    req: NextRequest,
-    { params }: { params: { id: string } }
-) {
-    const id = Number(params.id)
-
-    if (isNaN(id)) {
-        return new NextResponse("ID tidak valid", { status: 400 })
-    }
-
-    await db
-        .delete(transactions)
-        .where(eq(
-            transactions.id, id
-        ))
-    
-    return NextResponse.json({ message: "Berhasil dihapus" })
-}
-
-export async function PUT(
-    req: Request,
-    { params }: { params: { id: string } }
-) {
-    const id = parseInt(params.id)
-    const body = await req.json();
-
-    const [updated] = await db
-        .update(transactions)
-        .set({
-            title: body.title,
-            amount: body.amount,
-            category: body.category,
-        })
-        .where(eq(
-            transactions.id, id
-        ))
-        .returning()
-    
-    return NextResponse.json(updated);
 }
